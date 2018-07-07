@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Document</title>
+        <style>
+    *{
+        margin:0;
+        padding:0;
+        list-style: none;
+        box-sizing: border-box;
+    }
+    html,body{
+        height:100%;
+    }
+    body{
+        /* width:100%; */
+        background:url('./t01d3b68a59eec70e5e.png') no-repeat center center;
+        background-size:cover;
+    }
+    .so_layout{
+        margin:0 auto;
+        padding-top:100px;
+        text-align: center;
+    }
+    .search_link{
+        display: block;
+        width:400px;
+        height:125px;
+        margin:0 auto;
+        background:url(./t01e92920a7b90351cc.png) no-repeat center center;
+        background-size:240px 64px;
+    }
+    .so_layout > .search_area{
+        width:519px;
+        margin:0 auto;
+        position: relative;
+    }
+    .so_layout > .search_area form{
+        padding:5px 10px;
+        border:1px solid #ccc;
+        background:#fff;
+        width:519px;
+    }
+    .so_layout  form > input{
+        width:100%;
+        height:30px;
+        border:none;
+        outline:none;
+        font-size:16px;
+        color: #333;
+    }
+    .so_layout .so_result{
+        position: absolute;
+        width:100%;
+        border:1px solid #ccc;
+        display: none;
+    }
+    .so_layout .so_result li{
+        padding:5px;
+        background:#eee;
+        text-align: left;
+    }
+        </style>
+    </head>
+    <body>
+        <div class="so_layout">
+            <a href="javascript:;" class="search_link">
+            </a>
+            <div class="search_area">
+                <form>
+                    <input type="text" id="search_content">
+                </form>
+                <ul class="so_result">
+                    <!-- 模板代码放这儿 -->
+                </ul>
+            </div>
+        </div>
+        <script src="./template-web.js"></script>
+        <script type="text/template" id="searchTpl">
+        {{each result}}
+            <li>{{$value.word}}</li>
+        {{/each}}
+        </script>
+        <script>
+        //data可以传入的形式 'a=1&b=2'或者{a:1,b:2}
+        function jsonp(option){
+            if(typeof option.data == 'object'){
+                var str = '';
+                for(var i in option.data){
+                    str += i + '=' + option.data[i] + '&';
+                }
+                option.data = str.slice(0,str.length-1);
+            }
+            var fnName = "fn";
+            var url = option.url + '?callback=' + fnName + '&' +  option.data;
+            console.log(url);
+            //分析：拿回来的数据是全局的 ---> 我们必须提前有一个这样的全局函数 --> 可是我们的代码已经写到这里来了，我们怎么样才能创建一个全局的函数呢?
+            window[fnName] = function (data) {
+                console.log(data);
+                var html = template('searchTpl', data);
+                document.querySelector('.so_result').innerHTML = html;
+                document.querySelector('.so_result').style.display = 'block';
+            }
+            var oScript = document.createElement('script');
+            oScript.setAttribute("src", url);
+            document.body.appendChild(oScript);
+        }
+        window.onload = function () {
+            var search_content = document.querySelector('#search_content');
+            search_content.onkeyup = function () {
+                console.log(this.value);
+                var txt = this.value;
+                jsonp({
+                    url:'https://sug.so.360.cn/suggest',
+                    data:{
+                        encodein:'utf-8',
+                        encodeout:'utf-8',
+                        format:'json',
+                        fields:'word',
+                        word:txt
+                    }
+                });
+            }
+            search_content.onblur = function(){
+                document.querySelector('.so_result').style.display = 'none';
+            }
+        }
+        </script>
+    </body>
+</html>>
